@@ -9,12 +9,14 @@ const HTTP_METHODS = {
 
 const DEFAULT_TIMEOUT = 3000
 
+const API_BASE = 'https://api.github.com/search/repositories?'
+
 const createCancelableHttp$ = (url, opt = {method: HTTP_METHODS.GET}) => {
   return new Observable(subscriber => {
     let cancelRequest
     const CancelToken = axios.CancelToken
 
-    axios(url, {
+    axios(`${API_BASE}${url}`, {
       ...opt,
       cancelToken: new CancelToken(c => {
         cancelRequest = c
@@ -36,6 +38,21 @@ const createCancelableHttp$ = (url, opt = {method: HTTP_METHODS.GET}) => {
     )
 }
 
+const buildRequestParams = (params) => {
+  let url = ''
+  for (let key in params) {
+    if (url !== '') {
+      url += '&'
+    }
+    url += `${key}=${params[key]}`
+    if (key === 'q') {
+      url += '+in:name'
+    }
+  }
+  return url
+}
+
 export {
-  createCancelableHttp$
+  createCancelableHttp$,
+  buildRequestParams
 }

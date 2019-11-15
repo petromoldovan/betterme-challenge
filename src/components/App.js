@@ -3,11 +3,22 @@ import {fromEvent} from 'rxjs'
 import {debounceTime, switchMap, map} from 'rxjs/operators'
 import get from 'lodash/get'
 import Root from "./styled/Root"
-import {createCancelableHttp$} from "../data/utils"
+import {buildRequestParams, createCancelableHttp$} from "../data/utils"
 
-const API_BASE = 'https://api.github.com/search/repositories?q=tetris&sort=stars&order=desc'
+const DIRECTION = {
+  ASC: 'asc',
+  DESC: 'desc'
+}
+
+const DEFAULT_PARAMS = {
+  sort: DIRECTION.ASC,
+  order: 'stars',
+  page: 1,
+  per_page: 30
+}
 
 const App = () => {
+  const [searchParams, setSearchParams] = useState(() => DEFAULT_PARAMS)
   const [data, setData] = useState(() => {})
   const inputRef = useRef(null)
 
@@ -16,14 +27,16 @@ const App = () => {
       .pipe(
         map(e => get(e, 'target.value')),
         debounceTime(300),
-        switchMap(v => createCancelableHttp$(API_BASE))
+        switchMap(q => {
+          return createCancelableHttp$(buildRequestParams({...searchParams, q}))
+        })
       )
     changeEvent$.subscribe({
       next: res => setData(res),
       error: console.log,
       complete: console.log,
     })
-  }, [])
+  }, [searchParams])
 
   return (
     <Root>
