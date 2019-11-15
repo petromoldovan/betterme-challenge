@@ -6,14 +6,16 @@ const API_BASE = 'https://api.github.com/search/repositories?q=tetris&sort=stars
 
 const App = () => {
   useEffect(() => {
-    createCacelableHttp$(API_BASE)
+    const sub = createCacelableHttp$(API_BASE)
       .subscribe({
         next: console.log,
         error: console.log,
         complete: console.log,
       })
+    
+    return () => sub.unsubscribe()
   }, [])
-  
+
   return (
     <Root>
       hello

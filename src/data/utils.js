@@ -7,13 +7,21 @@ const HTTP_METHODS = {
 
 const createCacelableHttp$ = (url, opt = {method: HTTP_METHODS.GET}) => {
   return new Observable(subscriber => {
-    axios(url, {...opt})
+    let cancelRequest
+    const CancelToken = axios.CancelToken
+
+    axios(url, {
+      ...opt,
+      cancelToken: new CancelToken(c => {
+        cancelRequest = c
+      })})
       .then(res => {
-        console.log('res', res)
         return subscriber.next(res)
       })
       .catch(e => subscriber.error(e))
       .finally(() => subscriber.complete())
+
+    return () => cancelRequest()
   })
 }
 
