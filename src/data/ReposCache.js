@@ -1,4 +1,4 @@
-import {BehaviorSubject, fromEvent, combineLatest} from "rxjs"
+import {BehaviorSubject, fromEvent, combineLatest, of} from "rxjs"
 import {debounceTime, map, switchMap, distinctUntilChanged, skipWhile} from "rxjs/operators"
 import get from 'lodash/get'
 import {buildRequestParams, createCancelableHttp$} from "./utils"
@@ -38,20 +38,37 @@ class ReposCacheClass {
   loading$ = this.state$.pipe(map(s => s.loading), distinctUntilChanged())
 
   constructor() {
+    this.cache = new Map()
     this.api = API_ENDPOINT
 
     // fetch whenever one of the observables emits a new value
     combineLatest(this.q$, this.pagination$, this.orderBy$)
       .pipe(
         skipWhile(([q]) => q === ''),
-        debounceTime(0),
         switchMap(([q, pagination, orderBy]) => {
-          return createCancelableHttp$(`${this.api}${buildRequestParams({q, pagination, orderBy})}`)
-        })
+          const params = buildRequestParams({q, pagination, orderBy})
+          if (this.cache.has(params)) {
+            return of(this.cache.get(params))
+          }
+          return createCancelableHttp$(`${this.api}${params}`)
+        }),
       )
       .subscribe(res => {
+        this.setInCache(res)
         this.updateStore({ repos: res, loading: false })
       })
+  }
+
+  setInCache = (res) => {
+    const {pagination, q, orderBy} = this.store.getValue()
+    const key = buildRequestParams({q, pagination, orderBy})
+    if (!this.cache.has(key)) {
+      this.cache.set(key, res)
+    }
+  }
+
+  purge = () => {
+    this.cache.clear()
   }
 
   updateStore = newState => {
