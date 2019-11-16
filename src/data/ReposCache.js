@@ -22,7 +22,8 @@ const initialStore = {
   repos: [],
   q: '',
   pagination: PAGIANTION_DEFAULT_PARAMS,
-  orderBy: ORDERBY_DEFAULT_PARAMS
+  orderBy: ORDERBY_DEFAULT_PARAMS,
+  loading: false
 }
 
 const API_ENDPOINT = 'https://api.github.com/search/repositories'
@@ -34,6 +35,7 @@ class ReposCacheClass {
   pagination$ = this.state$.pipe(map(s => s.pagination), distinctUntilChanged())
   orderBy$ = this.state$.pipe(map(s => s.orderBy), distinctUntilChanged())
   q$ = this.state$.pipe(map(s => s.q), distinctUntilChanged())
+  loading$ = this.state$.pipe(map(s => s.loading), distinctUntilChanged())
 
   constructor() {
     this.api = API_ENDPOINT
@@ -48,7 +50,7 @@ class ReposCacheClass {
         })
       )
       .subscribe(res => {
-        this.updateStore({ repos: res })
+        this.updateStore({ repos: res, loading: false })
       })
   }
 
@@ -64,17 +66,22 @@ class ReposCacheClass {
         debounceTime(300),
       )
     return changeEvent$.subscribe({
-      next: q =>{
-        console.log('new q emited')
-        this.updateStore({q})
-      }
+      next: q => this.updateStore({q, loading: true})
     })
   }
 
+  updatePagination = pagination => {
+    this.updateStore({pagination, loading: true})
+  }
+
+  updateOrderBy = orderBy => {
+    this.updateStore({orderBy, loading: true})
+  }
+
   getViewData$ = () => {
-    return combineLatest(this.repos$, this.orderBy$, this.pagination$, this.q$)
+    return combineLatest(this.repos$, this.orderBy$, this.pagination$, this.q$, this.loading$)
       .pipe(
-        map(([repos, orderBy, pagination, q]) => ({repos, orderBy, pagination, q}))
+        map(([repos, orderBy, pagination, q, loading]) => ({repos, orderBy, pagination, q, loading}))
       )
   }
 }
