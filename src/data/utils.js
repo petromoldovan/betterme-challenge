@@ -38,19 +38,12 @@ const createCancelableHttp$ = (url, opt = {method: HTTP_METHODS.GET}) => {
 }
 
 const buildRequestParams = (params) => {
-  let url = ''
-  for (let key in params) {
-    if (url !== '') {
-      url += '&'
-    }
-    url += `${key}=${params[key]}`
-    if (key === 'q') {
-      url += '+in:name'
-    }
+  let url = `?order=${get(params, 'orderBy.order', '')}&sort=${get(params, 'orderBy.sort', '')}&page=${get(params, 'pagination.page', '')}&per_page=${get(params, 'pagination.per_page', '')}`
+  if (get(params, 'q')) {
+    url += `&q=${get(params, 'q')}+in:name&`
   }
   return url
 }
-
 export {
   createCancelableHttp$,
   buildRequestParams

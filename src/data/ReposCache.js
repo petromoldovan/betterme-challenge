@@ -1,5 +1,5 @@
 import {BehaviorSubject, fromEvent, combineLatest} from "rxjs"
-import {debounceTime, map, switchMap, distinctUntilChanged} from "rxjs/operators"
+import {debounceTime, map, switchMap, distinctUntilChanged, skipWhile} from "rxjs/operators"
 import get from 'lodash/get'
 import {buildRequestParams, createCancelableHttp$} from "./utils"
 
@@ -25,8 +25,12 @@ const initialStore = {
   orderBy: ORDERBY_DEFAULT_PARAMS
 }
 
+const API_ENDPOINT = 'https://api.github.com/search/repositories'
+
 class ReposCacheClass {
   constructor() {
+    this.api = API_ENDPOINT
+
     this.store = new BehaviorSubject(initialStore)
     this.state$ = this.store.asObservable()
     this.repos$ = this.state$.pipe(map(s => s.repos, distinctUntilChanged()))
@@ -34,30 +38,31 @@ class ReposCacheClass {
     this.orderBy$ = this.state$.pipe(map(s => s.orderBy, distinctUntilChanged()))
     this.q$ = this.state$.pipe(map(s => s.q, distinctUntilChanged()))
 
-    this.api = 'https://api.github.com/search/repositories?'
+    combineLatest(this.q$, this.pagination$, this.orderBy$)
+      .pipe(
+        skipWhile(([q]) => q === ''),
+        switchMap(([q, pagination, orderBy]) => {
+          return createCancelableHttp$(`${this.api}${buildRequestParams({q, pagination, orderBy})}`)
+        })
+      )
+      .subscribe(res => {
+        this.updateStore({ repos: res, loading: false })
+      })
   }
 
   updateStore = newState => {
-    this.store.next(newState)
+    this.store.next({...this.store.getValue(), ...newState})
   }
 
-  addOnSearchListener = (inputRef) => {
+  updateQ = (inputRef) => {
     if (!inputRef) return null
     const changeEvent$ = fromEvent(inputRef.current, 'input')
       .pipe(
         map(e => get(e, 'target.value')),
         debounceTime(300),
-        switchMap(q => {
-          return createCancelableHttp$(`${this.api}${buildRequestParams({...this.pagination$, ...this.orderBy$, q})}`)
-        })
       )
     return changeEvent$.subscribe({
-      next: res => {
-        console.log('initialStore', this.store.getValue())
-        this.updateStore({...this.store.getValue(), repos: res})
-      },
-      error: console.log,
-      complete: console.log,
+      next: q => this.updateStore({q})
     })
   }
 
