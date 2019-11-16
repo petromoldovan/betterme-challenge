@@ -1,22 +1,20 @@
-import {Observable} from "rxjs"
-import {map, timeout, catchError, retry} from 'rxjs/operators'
-import axios from 'axios'
+import {from, Observable} from "rxjs"
+import axios from "axios"
+import {catchError, map, retry, timeout} from "rxjs/operators"
 import get from 'lodash/get'
 
-const HTTP_METHODS = {
+export const HTTP_METHODS = {
   GET: 'GET'
 }
 
-const DEFAULT_TIMEOUT = 3000
-
-const API_BASE = 'https://api.github.com/search/repositories?'
+const DEFAULT_TIMEOUT = 2000
 
 const createCancelableHttp$ = (url, opt = {method: HTTP_METHODS.GET}) => {
   return new Observable(subscriber => {
     let cancelRequest
     const CancelToken = axios.CancelToken
 
-    axios(`${API_BASE}${url}`, {
+    axios(url, {
       ...opt,
       cancelToken: new CancelToken(c => {
         cancelRequest = c
@@ -25,14 +23,15 @@ const createCancelableHttp$ = (url, opt = {method: HTTP_METHODS.GET}) => {
       .catch(e => subscriber.error(e))
       .finally(() => subscriber.complete())
 
+    // cancel request on unsubscribe
     return () => cancelRequest()
   })
     .pipe(
       map(res => get(res, 'data')),
       timeout(DEFAULT_TIMEOUT),
       catchError(e => {
-        console.log('e', e)
-        return e
+        console.log('e',e)
+        return from(e)
       }),
       retry(1)
     )
