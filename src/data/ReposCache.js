@@ -1,5 +1,5 @@
 import {BehaviorSubject, fromEvent, combineLatest, of} from "rxjs"
-import {debounceTime, map, switchMap, distinctUntilChanged, skipWhile} from "rxjs/operators"
+import {debounceTime, map, switchMap, distinctUntilChanged, filter} from "rxjs/operators"
 import get from 'lodash/get'
 import {buildRequestParams, createCancelableHttp$} from "./utils"
 
@@ -44,7 +44,14 @@ class ReposCacheClass {
     // fetch whenever one of the observables emits a new value
     combineLatest(this.q$, this.pagination$, this.orderBy$)
       .pipe(
-        skipWhile(([q]) => q === ''),
+        debounceTime(0), //hack to fix the glitch with combineLatest. Source: https://blog.strongbrew.io/combine-latest-glitch/
+        filter(([q]) => {
+          if (q === '') {
+            this.updateStore({ loading: false })
+            return false
+          }
+          return true
+        }),
         switchMap(([q, pagination, orderBy]) => {
           const params = buildRequestParams({q, pagination, orderBy})
           if (this.cache.has(params)) {
@@ -53,9 +60,11 @@ class ReposCacheClass {
           return createCancelableHttp$(`${this.api}${params}`)
         }),
       )
-      .subscribe(res => {
-        this.setInCache(res)
-        this.updateStore({ repos: res, loading: false })
+      .subscribe({
+        next: res  => {
+          this.setInCache(res)
+          this.updateStore({ repos: res, loading: false })
+        }
       })
   }
 
@@ -83,12 +92,12 @@ class ReposCacheClass {
         debounceTime(300),
       )
     return changeEvent$.subscribe({
-      next: q => this.updateStore({q, loading: true})
+      next: q => this.updateStore({q, pagination: initialStore.pagination, orderBy: initialStore.orderBy, loading: true})
     })
   }
 
-  updatePagination = pagination => {
-    this.updateStore({pagination, loading: true})
+  updatePagination = (page) => {
+    this.updateStore({pagination: {...this.store.getValue().pagination, page}, loading: true})
   }
 
   updateOrderBy = orderBy => {
