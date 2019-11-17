@@ -1,7 +1,8 @@
 import React, {useEffect, useState, useMemo} from 'react'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
-import {reposCache} from "../data/ReposCache"
+import {reposCache} from "../../data/ReposCache"
+import '../styles.scss'
 
 const MAX_PAGES = 11
 const buildPages = (currentPage, pageCount) => {
@@ -45,10 +46,10 @@ const List = () => {
   }, [data])
 
   return (
-    <div>
+    <section>
       <h1>List</h1>
       {!isEmpty(pages) && pages}
-    </div>
+    </section>
   )
 }
 
