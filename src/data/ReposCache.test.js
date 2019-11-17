@@ -18,6 +18,7 @@ describe('[ReposCache]', () => {
   describe('[Caching]', () => {
     const userInput = 'example repo'
     let httpRequestSpy = sinon.spy()
+    // mock the createCancelableHttp$. Assigns a new value to const but it does not matter for tests.
     mockUtils.createCancelableHttp$ = (url) => {
       return new Observable.create((sub) => {
         httpRequestSpy(url)
