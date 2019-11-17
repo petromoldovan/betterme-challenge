@@ -53,7 +53,6 @@ const buildListItems = (items = [], orderBy = {}) => {
         {items.map((item, idx) => <ListItem key={`row-${idx}`} {...pick(item, ['full_name', 'stargazers_count', 'html_url', 'description'])}/>)}
       </ul>
     </div>
-
   )
 }
 
