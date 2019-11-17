@@ -7,8 +7,8 @@ import {DIRECTION, reposCache} from "../../data/ReposCache"
 import '../styles.scss'
 import SortArrow from "../assets/SortArrow"
 
-const MAX_PAGES = 11
-const buildPages = (currentPage, pageCount) => {
+export const MAX_PAGES = 11
+export const buildPages = (currentPage, pageCount) => {
   let nMin = 1
   let nMax = pageCount > MAX_PAGES ? MAX_PAGES  : pageCount
   // find indexes
