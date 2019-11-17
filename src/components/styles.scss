@@ -11,6 +11,12 @@ body {
   color: #24292e;
   background-color: #fff;
 }
+h1 {
+  color: $base-color;
+}
+a {
+  cursor: pointer;
+}
 ul, p {
   margin: 0;
   padding: 0;
@@ -61,7 +67,7 @@ section {
   box-shadow: inset 0 1px 2px rgba(27,31,35,.075);
 }
 .modal {
-  position: absolute;
+  position: fixed;
   background-color: #fff;
   width: 100%;
   height: 100%;
@@ -73,9 +79,18 @@ section {
   justify-content: center;
 }
 .pageContainer {
-  button.active {
-    color: #fff;
-    background-color: rgb(61, 41, 175);
+  align-items: center;
+  button {
+    border-radius: 4px;
+    outline: none;
+    margin: 0 3px;
+    &:focus {
+      outline: none;
+    }
+    &.active {
+      color: #fff;
+      background-color: rgb(61, 41, 175);
+    }
   }
 }
 .space-between {

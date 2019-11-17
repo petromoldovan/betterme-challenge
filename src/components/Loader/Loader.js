@@ -1,5 +1,5 @@
 import React from 'react'
-import LoaderSVG from "./LoaderSVG"
+import LoaderSVG from "../assets/LoaderSVG"
 import '../styles.scss'
 
 const Loader = () => {
