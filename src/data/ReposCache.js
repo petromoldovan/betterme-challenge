@@ -14,7 +14,7 @@ const PAGIANTION_DEFAULT_PARAMS = {
 }
 
 const ORDERBY_DEFAULT_PARAMS = {
-  sort: DIRECTION.ASC,
+  sort: DIRECTION.DESC,
   order: 'stars'
 }
 
@@ -100,8 +100,17 @@ class ReposCacheClass {
     this.updateStore({pagination: {...this.store.getValue().pagination, page}, loading: true})
   }
 
-  updateOrderBy = orderBy => {
-    this.updateStore({orderBy, loading: true})
+  updateOrderBy = newOrderBy => {
+    let orderBy = this.store.getValue().orderBy
+    let order
+    let sort
+    if (orderBy.order === newOrderBy.order) {
+      sort = orderBy.sort === DIRECTION.ASC ? DIRECTION.DESC : DIRECTION.ASC
+    } else {
+      order = newOrderBy.order
+      sort = DIRECTION.DESC
+    }
+    this.updateStore({orderBy: {order, sort}, loading: true})
   }
 
   getViewData$ = () => {
