@@ -18,7 +18,7 @@ const ORDERBY_DEFAULT_PARAMS = {
   order: DIRECTION.DESC
 }
 
-const initialStore = {
+export const initialStore = {
   repos: [],
   q: '',
   pagination: PAGIANTION_DEFAULT_PARAMS,

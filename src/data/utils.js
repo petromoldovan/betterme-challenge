@@ -1,6 +1,6 @@
-import {from, Observable} from "rxjs"
+import {Observable} from "rxjs"
 import axios from "axios"
-import {catchError, map, retry, timeout} from "rxjs/operators"
+import {map, retry, timeout} from "rxjs/operators"
 import get from 'lodash/get'
 
 export const HTTP_METHODS = {
@@ -29,10 +29,6 @@ const createCancelableHttp$ = (url, opt = {method: HTTP_METHODS.GET}) => {
     .pipe(
       map(res => get(res, 'data')),
       timeout(DEFAULT_TIMEOUT),
-      catchError(e => {
-        console.log('e',e)
-        return from(e)
-      }),
       retry(1)
     )
 }
