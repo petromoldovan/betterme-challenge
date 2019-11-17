@@ -1,3 +1,5 @@
+$base-color: #003B61;
+
 * {
   box-sizing: border-box;
 }
@@ -88,11 +90,26 @@ section {
 .clickable {
   cursor: pointer;
 }
+.rotate {
+  transform: rotate(180deg);
+}
 .listContainer {
   .listHeader {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    p {
+      color: $base-color;
+      line-height: 20px;
+    }
+    .sortable {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      p {
+        margin-right: 5px;
+      }
+    }
   }
   ul {
     list-style: none;

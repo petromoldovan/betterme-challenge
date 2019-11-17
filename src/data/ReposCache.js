@@ -3,7 +3,7 @@ import {debounceTime, map, switchMap, distinctUntilChanged, filter} from "rxjs/o
 import get from 'lodash/get'
 import {buildRequestParams, createCancelableHttp$} from "./utils"
 
-const DIRECTION = {
+export const DIRECTION = {
   ASC: 'asc',
   DESC: 'desc'
 }
@@ -14,8 +14,8 @@ const PAGIANTION_DEFAULT_PARAMS = {
 }
 
 const ORDERBY_DEFAULT_PARAMS = {
-  sort: DIRECTION.DESC,
-  order: 'stars'
+  sort: 'stars',
+  order: DIRECTION.DESC
 }
 
 const initialStore = {
@@ -104,13 +104,14 @@ class ReposCacheClass {
     let orderBy = this.store.getValue().orderBy
     let order
     let sort
-    if (orderBy.order === newOrderBy.order) {
-      sort = orderBy.sort === DIRECTION.ASC ? DIRECTION.DESC : DIRECTION.ASC
+    if (orderBy.sort === newOrderBy.sort) {
+      sort = orderBy.sort
+      order = orderBy.order === DIRECTION.ASC ? DIRECTION.DESC : DIRECTION.ASC
     } else {
-      order = newOrderBy.order
-      sort = DIRECTION.DESC
+      sort = newOrderBy.sort
+      order = initialStore.orderBy.order
     }
-    this.updateStore({orderBy: {order, sort}, loading: true})
+    this.updateStore({orderBy: {order, sort}, pagination: initialStore.pagination, loading: true})
   }
 
   getViewData$ = () => {

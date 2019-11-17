@@ -3,8 +3,9 @@ import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import pick from 'lodash/pick'
 import ListItem from './ListItem'
-import {reposCache} from "../../data/ReposCache"
+import {DIRECTION, reposCache} from "../../data/ReposCache"
 import '../styles.scss'
+import SortArrow from "../assets/SortArrow"
 
 const MAX_PAGES = 11
 const buildPages = (currentPage, pageCount) => {
@@ -35,14 +36,17 @@ const buildPages = (currentPage, pageCount) => {
   )
 }
 
-const buildListItems = (items = []) => {
+const buildListItems = (items = [], orderBy = {}) => {
   if (!items || isEmpty(items)) return null
   return (
     <div className={'listContainer'}>
       <div className={'listHeader'}>
         <p className={'bold'}>Project</p>
-        <div>
-          <p className={'bold clickable'} onClick={() => reposCache.updateOrderBy({order: 'stars'})}>Stars</p>
+        <div className={'sortable clickable'} onClick={() => reposCache.updateOrderBy({sort: 'stars'})}>
+          <p className={'bold'}>Stars</p>
+          <div className={orderBy.order === DIRECTION.ASC ? 'rotate' : ''}>
+            <SortArrow />
+          </div>
         </div>
       </div>
       <ul className={'rowItem direction-column'}>
@@ -56,8 +60,8 @@ const buildListItems = (items = []) => {
 const List = () => {
   const [data, setData] = useState(() => {})
   useEffect(() => {
-    reposCache.getViewData$().subscribe(({repos, pagination}) => {
-      setData({repos, pagination})
+    reposCache.getViewData$().subscribe(({repos, pagination, orderBy}) => {
+      setData({repos, pagination, orderBy})
     })
   }, [])
 
@@ -65,9 +69,10 @@ const List = () => {
     const pageCount = (Math.ceil(get(data, 'repos.total_count', 0) / get(data, 'pagination.per_page', 1)))
     const currentPage = get(data, 'pagination.page', 1)
     const items = get(data, 'repos.items', [])
+    const orderBy = get(data, 'orderBy', {})
     return {
       pages: buildPages(currentPage, pageCount),
-      items: buildListItems(items)
+      items: buildListItems(items, orderBy)
     }
   }, [data])
 
