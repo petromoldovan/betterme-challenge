@@ -8,6 +8,9 @@ thanks for the awesome challenge! I would like to point out few things about the
 5. I copied some svgs from the web to make ui nicer. I hope it is ok.
 
 ### Start on 3000
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7033248e2a8e455e9f2bd96a9cb44492)](https://app.codacy.com/gh/petromoldovan/betterme-challenge?utm_source=github.com&utm_medium=referral&utm_content=petromoldovan/betterme-challenge&utm_campaign=Badge_Grade_Settings)
+
 `npm start`
 
 ### Test
